@@ -1,0 +1,16 @@
+parameters:
+    level: 6
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+        - tests/
+    excludePaths:
+        # Framework-generated bootstrap, not worth analysing.
+        - tests/bootstrap.php
+    doctrine:
+        # Entities follow the Symfony Maker convention of nullable, default-null
+        # properties (e.g. `?string $name = null`) even for NOT NULL columns,
+        # because the object is hydrated after construction. Allow it.
+        allowNullablePropertyForRequiredField: true

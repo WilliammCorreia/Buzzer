@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, static analysis & tests
+    runs-on: ubuntu-latest
+
+    services:
+      database:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: buzzer
+          POSTGRES_USER: buzzer
+          POSTGRES_PASSWORD: buzzer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U buzzer"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      APP_ENV: test
+      # The test env appends "_test" to the db name (see config/packages/doctrine.yaml),
+      # so this resolves to the "buzzer_test" database created by the step below.
+      DATABASE_URL: "postgresql://buzzer:buzzer@127.0.0.1:5432/buzzer?serverVersion=16&charset=utf8"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, pdo_pgsql, zip, opcache
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      # --- Lint --------------------------------------------------------------
+      - name: Lint YAML configuration
+        run: php bin/console lint:yaml config --parse-tags
+
+      - name: Lint Twig templates
+        run: php bin/console lint:twig templates
+
+      - name: Lint service container
+        run: php bin/console lint:container
+
+      # --- Static analysis ---------------------------------------------------
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress
+
+      # --- Tests -------------------------------------------------------------
+      - name: Prepare test database
+        run: |
+          php bin/console doctrine:database:create --if-not-exists --env=test
+          php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=test
+
+      - name: Run test suite
+        run: php bin/phpunit
