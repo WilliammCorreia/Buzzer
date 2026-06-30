@@ -33,13 +33,45 @@
             <hr>
 
             {% if game.isOpenForPredictions %}
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="badge text-bg-success">Pronostics ouverts</span>
-                    {# Le formulaire de pronostic sera branché ici (étape suivante du Pôle 1). #}
-                    <button class="btn btn-primary btn-sm" disabled title="Bientôt disponible">Pronostiquer</button>
+                    {% if app.user %}
+                        <a class="btn btn-primary btn-sm" href="{{ path('app_prediction_new', {id: game.id}) }}">Pronostiquer</a>
+                    {% else %}
+                        <a class="btn btn-primary btn-sm" href="{{ path('app_login') }}">Connectez-vous pour pronostiquer</a>
+                    {% endif %}
                 </div>
             {% else %}
                 <span class="badge text-bg-secondary">Pronostics clôturés</span>
+            {% endif %}
+
+            {% if userPredictions is not empty %}
+                <hr>
+                <h2 class="h6">Vos pronostics</h2>
+                <ul class="list-group">
+                    {% for prediction in userPredictions %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if prediction.type == 'match_winner' %}
+                                    <strong>Vainqueur&nbsp;:</strong> {{ prediction.predictedWinner.name }}
+                                {% elseif prediction.type == 'score' %}
+                                    <strong>Score&nbsp;:</strong> {{ prediction.predictedAwayScore }} – {{ prediction.predictedHomeScore }}
+                                {% elseif prediction.type == 'player_prop' %}
+                                    <strong>{{ prediction.player.fullName }}</strong>
+                                    · {{ prediction.statType.label }} {{ prediction.comparison.label|lower }} {{ prediction.predictedValue }}
+                                {% endif %}
+                                <span class="badge text-bg-{{ prediction.status|status_class }} ms-2">{{ prediction.status.label }}</span>
+                            </div>
+                            {% if is_granted('PREDICTION_DELETE', prediction) %}
+                                <form method="post" action="{{ path('app_prediction_delete', {id: prediction.id}) }}"
+                                      onsubmit="return confirm('Supprimer ce pronostic ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_prediction_' ~ prediction.id) }}">
+                                    <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
             {% endif %}
         </div>
     </div>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Game;
 use App\Entity\Prediction;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -37,5 +38,30 @@ class PredictionRepository extends ServiceEntityRepository
             ->orderBy('p.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * All of a user's predictions on a given game (one per type at most), newest first.
+     *
+     * @return Prediction[]
+     */
+    public function findForUserAndGame(User $user, Game $game): array
+    {
+        return $this->findBy(['user' => $user, 'game' => $game], ['createdAt' => 'DESC']);
+    }
+
+    /**
+     * RG-02: a user may only have one prediction per game and per type.
+     * Returns the existing prediction of that type, if any.
+     */
+    public function findOneOfTypeForUserAndGame(User $user, Game $game, string $type): ?Prediction
+    {
+        foreach ($this->findForUserAndGame($user, $game) as $prediction) {
+            if ($prediction->getType() === $type) {
+                return $prediction;
+            }
+        }
+
+        return null;
     }
 }
