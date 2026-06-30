@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Comment;
+use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,5 +17,23 @@ class CommentRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Comment::class);
+    }
+
+    /**
+     * Comments of a game with their author joined (avoids the N+1 problem),
+     * newest first.
+     *
+     * @return Comment[]
+     */
+    public function findForGameWithAuthor(Game $game): array
+    {
+        return $this->createQueryBuilder('c')
+            ->addSelect('author')
+            ->innerJoin('c.author', 'author')
+            ->andWhere('c.game = :game')
+            ->setParameter('game', $game)
+            ->orderBy('c.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 }

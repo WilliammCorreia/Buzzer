@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · Calendrier{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Calendrier des matchs</h1>
+        <span class="text-secondary small">{{ total }} match{{ total > 1 ? 's' : '' }}</span>
+    </div>
+
+    {% if total == 0 %}
+        <div class="alert alert-info">
+            Aucun match en base. Chargez les fixtures ou lancez la synchronisation NBA.
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle bg-body shadow-sm rounded">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Affiche</th>
+                        <th scope="col" class="text-center">Statut</th>
+                        <th scope="col" class="text-center">Score</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                        <tr>
+                            <td class="text-nowrap">{{ game.startsAt|date('d/m/Y H:i') }}</td>
+                            <td>
+                                <span class="fw-semibold">{{ game.awayTeam.name }}</span>
+                                <span class="text-secondary">@</span>
+                                <span class="fw-semibold">{{ game.homeTeam.name }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge text-bg-{{ game.status|status_class }}">{{ game.status.label }}</span>
+                            </td>
+                            <td class="text-center">
+                                {% if game.homeScore is not null and game.awayScore is not null %}
+                                    {{ game.awayScore }} – {{ game.homeScore }}
+                                {% else %}
+                                    <span class="text-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_game_show', {id: game.id}) }}">
+                                    Détails
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pages > 1 %}
+            <nav aria-label="Pagination" class="mt-3">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ page <= 1 ? 'disabled' }}">
+                        <a class="page-link" href="{{ path('app_game_index', {page: page - 1}) }}">Précédent</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Page {{ page }} / {{ pages }}</span>
+                    </li>
+                    <li class="page-item {{ page >= pages ? 'disabled' }}">
+                        <a class="page-link" href="{{ path('app_game_index', {page: page + 1}) }}">Suivant</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+    {% endif %}
+{% endblock %}

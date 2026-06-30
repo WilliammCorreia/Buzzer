@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · {{ game.awayTeam.name }} @ {{ game.homeTeam.name }}{% endblock %}
+
+{% block body %}
+    <a href="{{ path('app_game_index') }}" class="btn btn-sm btn-link px-0 mb-2">← Calendrier</a>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="badge text-bg-{{ game.status|status_class }} mb-2">{{ game.status.label }}</span>
+                    <h1 class="h4 mb-1">
+                        {{ game.awayTeam.name }} <span class="text-secondary">@</span> {{ game.homeTeam.name }}
+                    </h1>
+                    <div class="text-secondary small">
+                        {{ game.startsAt|date('l d F Y · H:i') }}
+                        {% if game.season %} · {{ game.season.label }}{% endif %}
+                    </div>
+                </div>
+                <div class="text-end">
+                    {% if game.homeScore is not null and game.awayScore is not null %}
+                        <div class="display-6 fw-bold">{{ game.awayScore }} – {{ game.homeScore }}</div>
+                        {% if game.winner %}
+                            <div class="small text-success">Vainqueur : {{ game.winner.name }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div class="display-6 fw-bold text-secondary">— : —</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr>
+
+            {% if game.isOpenForPredictions %}
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge text-bg-success">Pronostics ouverts</span>
+                    {# Le formulaire de pronostic sera branché ici (étape suivante du Pôle 1). #}
+                    <button class="btn btn-primary btn-sm" disabled title="Bientôt disponible">Pronostiquer</button>
+                </div>
+            {% else %}
+                <span class="badge text-bg-secondary">Pronostics clôturés</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <h2 class="h5 mb-3">Commentaires <span class="text-secondary">({{ comments|length }})</span></h2>
+    {% if comments is empty %}
+        <p class="text-secondary">Aucun commentaire pour le moment.</p>
+    {% else %}
+        <ul class="list-group">
+            {% for comment in comments %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">{{ comment.author.username }}</span>
+                        <span class="text-secondary small">{{ comment.createdAt|date('d/m/Y H:i') }}</span>
+                    </div>
+                    <div>{{ comment.content }}</div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

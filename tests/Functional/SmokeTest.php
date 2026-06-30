@@ -29,4 +29,13 @@ final class SmokeTest extends WebTestCase
         self::assertSelectorExists('input[name="email"]');
         self::assertSelectorExists('input[name="password"]');
     }
+
+    public function testCalendarPageIsSuccessful(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/matchs');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Calendrier');
+    }
 }
