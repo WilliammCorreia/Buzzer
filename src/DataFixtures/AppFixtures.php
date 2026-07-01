@@ -89,6 +89,7 @@ class AppFixtures extends Fixture
             ->setContent('Gros choc à venir, je vois les Lakers s\'imposer à domicile !');
         $manager->persist($comment);
 
+<<<<<<< HEAD
         $hiddenComment = (new Comment())
             ->setAuthor($gestionnaire)
             ->setGame($upcoming)
@@ -102,6 +103,21 @@ class AppFixtures extends Fixture
             ->setDescription('Attribué après avoir soumis son tout premier pronostic.')
             ->setThreshold(1);
         $manager->persist($badge);
+=======
+        // --- Gamification (badges = paliers de points gagnés) --------------
+        foreach ([
+            ['Premier point', 'Marquez vos tout premiers points.', 1],
+            ['Rookie', 'Cumulez 25 points de pronostics.', 25],
+            ['All-Star', 'Cumulez 100 points de pronostics.', 100],
+        ] as [$badgeName, $badgeDescription, $badgeThreshold]) {
+            $manager->persist(
+                (new Badge())
+                    ->setName($badgeName)
+                    ->setDescription($badgeDescription)
+                    ->setThreshold($badgeThreshold)
+            );
+        }
+>>>>>>> 25d767c (feat(badge): Implémente les badges utilisateurs)
 
         // --- League + memberships (ManyToMany with attributes) -------------
         $league = (new League())
@@ -133,6 +149,17 @@ class AppFixtures extends Fixture
             ->setComparison(Comparison::Over);
         $propPrediction->setUser($parieur)->setGame($upcoming);
         $manager->persist($propPrediction);
+
+        // Predictions made (before tip-off) on the already-finished game, left
+        // PENDING so `app:predictions:settle` settles them in a demo:
+        // Warriors won 118-112 at home -> both are winning bets (10 + 30 pts).
+        $settledWinner = (new MatchWinnerPrediction())->setPredictedWinner($warriors);
+        $settledWinner->setUser($parieur)->setGame($finished);
+        $manager->persist($settledWinner);
+
+        $settledScore = (new ScorePrediction())->setPredictedHomeScore(118)->setPredictedAwayScore(112);
+        $settledScore->setUser($parieur)->setGame($finished);
+        $manager->persist($settledScore);
 
         $manager->flush();
     }

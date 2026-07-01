@@ -17,6 +17,7 @@ use App\Enum\Comparison;
 use App\Enum\GameStatus;
 use App\Enum\PredictionStatus;
 use App\Enum\StatType;
+use App\Service\Gamification\BadgeAwarderInterface;
 use App\Service\Scoring\PredictionSettlementService;
 use App\Service\Scoring\ScoringPolicy;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,8 +29,9 @@ final class PredictionSettlementServiceTest extends TestCase
     {
         return new PredictionSettlementService(
             new ScoringPolicy(),
-            // A stub is enough: the EM is only asked to flush(), with nothing to verify.
+            // Stubs are enough: the EM only flushes, the awarder is exercised in its own test.
             $this->createStub(EntityManagerInterface::class),
+            $this->createStub(BadgeAwarderInterface::class),
         );
     }
 

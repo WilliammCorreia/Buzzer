@@ -14,6 +14,7 @@ final class SettlementReport
     public int $won = 0;
     public int $lost = 0;
     public int $skipped = 0;
+    public int $badgesAwarded = 0;
 
     public function settled(): int
     {

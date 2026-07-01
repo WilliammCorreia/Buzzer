@@ -9,7 +9,9 @@ use App\Entity\MatchWinnerPrediction;
 use App\Entity\PlayerPropPrediction;
 use App\Entity\Prediction;
 use App\Entity\ScorePrediction;
+use App\Entity\User;
 use App\Enum\PredictionStatus;
+use App\Service\Gamification\BadgeAwarderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -20,12 +22,14 @@ use Doctrine\ORM\EntityManagerInterface;
  * RG-04: applies the {@see ScoringPolicy} scale.
  * RG-05: winning points are propagated to the author's standing in each of their
  *        leagues.
+ * UC-54: winners have their eligible badges attributed after settlement.
  */
 final class PredictionSettlementService
 {
     public function __construct(
         private readonly ScoringPolicy $policy,
         private readonly EntityManagerInterface $entityManager,
+        private readonly BadgeAwarderInterface $badgeAwarder,
     ) {
     }
 
@@ -42,6 +46,9 @@ final class PredictionSettlementService
         }
 
         $report = new SettlementReport();
+
+        /** @var array<int, User> $winners */
+        $winners = [];
 
         foreach ($game->getPredictions() as $prediction) {
             if (!$prediction->isPending()) {
@@ -63,6 +70,10 @@ final class PredictionSettlementService
                 $prediction->setStatus(PredictionStatus::Won);
                 $this->creditLeagues($prediction, $points);
                 ++$report->won;
+                $user = $prediction->getUser();
+                if ($user !== null) {
+                    $winners[spl_object_id($user)] = $user;
+                }
             } else {
                 $prediction->setStatus(PredictionStatus::Lost);
                 ++$report->lost;
@@ -70,6 +81,11 @@ final class PredictionSettlementService
         }
 
         $this->entityManager->flush();
+
+        // UC-54: attribute newly eligible badges to the winners.
+        foreach ($winners as $user) {
+            $report->badgesAwarded += $this->badgeAwarder->awardFor($user);
+        }
 
         return $report;
     }

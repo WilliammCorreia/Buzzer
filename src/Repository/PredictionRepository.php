@@ -64,4 +64,17 @@ class PredictionRepository extends ServiceEntityRepository
 
         return null;
     }
+
+    /**
+     * Total points a user has earned across all their predictions (badge metric).
+     */
+    public function totalPointsForUser(User $user): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COALESCE(SUM(p.pointsAwarded), 0)')
+            ->andWhere('p.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

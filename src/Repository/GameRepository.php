@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Game;
 use App\Enum\GameStatus;
+use App\Enum\PredictionStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -62,5 +63,27 @@ class GameRepository extends ServiceEntityRepository
 
         // fetchJoinCollection: false — we only fetch-join to-one relations here.
         return new Paginator($query, fetchJoinCollection: false);
+    }
+
+    /**
+     * Finished games (with an official score) that still have at least one
+     * pending prediction to settle.
+     *
+     * @return Game[]
+     */
+    public function findFinishedWithPendingPredictions(): array
+    {
+        return $this->createQueryBuilder('g')
+            ->innerJoin('g.predictions', 'p')
+            ->andWhere('g.status = :finished')
+            ->andWhere('p.status = :pending')
+            ->andWhere('g.homeScore IS NOT NULL')
+            ->andWhere('g.awayScore IS NOT NULL')
+            ->setParameter('finished', GameStatus::Finished)
+            ->setParameter('pending', PredictionStatus::Pending)
+            ->groupBy('g.id')
+            ->orderBy('g.startsAt', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }
