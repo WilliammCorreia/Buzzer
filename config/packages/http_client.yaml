@@ -1,0 +1,13 @@
+framework:
+    http_client:
+        scoped_clients:
+            # Client dédié à l'API NBA (API-Sports). Pour une souscription via
+            # RapidAPI, remplacez le header par `x-rapidapi-key` / `x-rapidapi-host`
+            # et adaptez `NBA_API_BASE_URI`.
+            nba.client:
+                base_uri: '%env(NBA_API_BASE_URI)%'
+                headers:
+                    x-apisports-key: '%env(SPORT_API)%'
+                    Accept: 'application/json'
+                timeout: 15
+                max_redirects: 2
