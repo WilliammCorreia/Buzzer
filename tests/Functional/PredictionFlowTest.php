@@ -48,4 +48,25 @@ final class PredictionFlowTest extends WebTestCase
         // ...and the default type (match winner) renders the team choice dynamically.
         self::assertSelectorExists('[name="prediction[predictedWinner]"]');
     }
+
+    public function testHistoryPageIsSuccessfulForAuthenticatedUser(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        self::assertInstanceOf(EntityManagerInterface::class, $em);
+
+        $suffix = uniqid();
+        $user = (new User())
+            ->setEmail('hist_'.$suffix.'@buzzer.test')
+            ->setUsername('h'.substr($suffix, -6))
+            ->setPassword('not-used-here');
+        $em->persist($user);
+        $em->flush();
+
+        $client->loginUser($user);
+        $client->request('GET', '/mon-historique');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Mon historique');
+    }
 }

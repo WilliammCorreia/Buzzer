@@ -13,6 +13,7 @@ use App\Entity\ScorePrediction;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Enum\Comparison;
+use App\Enum\PredictionStatus;
 use App\Enum\StatType;
 use App\Form\PredictionType;
 use App\Repository\PredictionRepository;
@@ -77,6 +78,42 @@ class PredictionController extends AbstractController
         return $this->render('prediction/new.html.twig', [
             'game' => $game,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/mon-historique', name: 'app_prediction_history', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function history(PredictionRepository $predictions): Response
+    {
+        $user = $this->getUser();
+        \assert($user instanceof User);
+
+        $history = $predictions->findHistoryForUser($user);
+
+        $won = 0;
+        $lost = 0;
+        $pending = 0;
+        $points = 0;
+        foreach ($history as $prediction) {
+            $points += $prediction->getPointsAwarded();
+            match ($prediction->getStatus()) {
+                PredictionStatus::Won => ++$won,
+                PredictionStatus::Lost => ++$lost,
+                PredictionStatus::Pending => ++$pending,
+            };
+        }
+        $settled = $won + $lost;
+
+        return $this->render('prediction/history.html.twig', [
+            'history' => $history,
+            'stats' => [
+                'total' => \count($history),
+                'pending' => $pending,
+                'won' => $won,
+                'lost' => $lost,
+                'points' => $points,
+                'successRate' => $settled > 0 ? (int) round($won / $settled * 100) : null,
+            ],
         ]);
     }
 
