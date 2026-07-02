@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · Modifier mon profil{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4">Modifier mon profil</h1>
+
+                    {{ form_start(form) }}
+                        {{ form_row(form.username) }}
+                        {{ form_row(form.favoriteTeams) }}
+                        <button class="btn btn-primary" type="submit">Enregistrer</button>
+                        <a class="btn btn-link" href="{{ path('app_profile_show') }}">Annuler</a>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -39,9 +39,17 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ path('app_game_index') }}">Calendrier</a>
                             </li>
+                            {% if app.user %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_league_index') }}">Mes ligues</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_profile_show') }}">Mon profil</a>
+                                </li>
+                            {% endif %}
                             {% if is_granted('ROLE_MANAGER') %}
                                 <li class="nav-item">
-                                    <a class="nav-link text-warning" href="#">Modération</a>
+                                    <a class="nav-link text-warning" href="{{ path('app_moderation_index') }}">Modération</a>
                                 </li>
                             {% endif %}
                             {% if is_granted('ROLE_ADMIN') %}
@@ -59,6 +67,9 @@
                                     <a class="btn btn-outline-light btn-sm" href="{{ path('app_logout') }}">Déconnexion</a>
                                 </li>
                             {% else %}
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-light btn-sm me-2" href="{{ path('app_register') }}">Inscription</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="btn btn-primary btn-sm" href="{{ path('app_login') }}">Connexion</a>
                                 </li>

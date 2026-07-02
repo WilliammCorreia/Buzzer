@@ -44,6 +44,7 @@ class AppFixtures extends Fixture
         $parieur = $this->createUser('user@buzzer.test', 'parieur', ['ROLE_USER']);
 
         foreach ([$admin, $gestionnaire, $parieur] as $user) {
+            $user->setIsVerified(true);
             $manager->persist($user);
         }
 
@@ -88,6 +89,13 @@ class AppFixtures extends Fixture
             ->setContent('Gros choc à venir, je vois les Lakers s\'imposer à domicile !');
         $manager->persist($comment);
 
+        $hiddenComment = (new Comment())
+            ->setAuthor($gestionnaire)
+            ->setGame($upcoming)
+            ->setContent('Message hors-sujet — masqué par la modération.')
+            ->setIsHidden(true);
+        $manager->persist($hiddenComment);
+
         // --- Gamification --------------------------------------------------
         $badge = (new Badge())
             ->setName('Premier pronostic')
@@ -103,8 +111,8 @@ class AppFixtures extends Fixture
             ->setIsPrivate(true);
         $manager->persist($league);
 
-        $manager->persist($this->createMembership($admin, $league, LeagueRole::Owner, 0));
-        $manager->persist($this->createMembership($parieur, $league, LeagueRole::Member, 0));
+        $manager->persist($this->createMembership($admin, $league, LeagueRole::Owner, 120));
+        $manager->persist($this->createMembership($parieur, $league, LeagueRole::Member, 95));
 
         // --- Predictions (Single Table Inheritance, one per type) ----------
         $winnerPrediction = (new MatchWinnerPrediction())

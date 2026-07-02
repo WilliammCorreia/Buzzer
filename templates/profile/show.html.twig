@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · Mon profil{% endblock %}
+
+{% block body %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="h4 mb-1">{{ user.username }}</h1>
+                    <div class="text-secondary">{{ user.email }}</div>
+                </div>
+                {% if user.verified %}
+                    <span class="badge text-bg-success">E-mail vérifié</span>
+                {% else %}
+                    <span class="badge text-bg-warning">E-mail non vérifié</span>
+                {% endif %}
+            </div>
+
+            <hr>
+
+            <h2 class="h6">Équipes favorites</h2>
+            {% if user.favoriteTeams is empty %}
+                <p class="text-secondary">Aucune équipe favorite.</p>
+            {% else %}
+                <div class="d-flex flex-wrap gap-2">
+                    {% for team in user.favoriteTeams %}
+                        <span class="badge text-bg-secondary">{{ team.name }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <hr>
+
+            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_profile_edit') }}">Modifier</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_league_index') }}">Mes ligues →</a>
+        </div>
+    </div>
+{% endblock %}

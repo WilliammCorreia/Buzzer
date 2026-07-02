@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\League;
 use App\Entity\LeagueMembership;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -34,6 +35,23 @@ class LeagueMembershipRepository extends ServiceEntityRepository
             ->setParameter('league', $league)
             ->orderBy('m.points', 'DESC')
             ->addOrderBy('m.joinedAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Memberships of a user, with the league joined to avoid the N+1 problem.
+     *
+     * @return LeagueMembership[]
+     */
+    public function findForUserWithLeague(User $user): array
+    {
+        return $this->createQueryBuilder('m')
+            ->addSelect('l')
+            ->innerJoin('m.league', 'l')
+            ->andWhere('m.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('l.name', 'ASC')
             ->getQuery()
             ->getResult();
     }

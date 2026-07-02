@@ -1,0 +1,5 @@
+<p>Vous avez été invité(e) à rejoindre la ligue « {{ league.name }} » sur Buzzer !</p>
+
+<p><a href="{{ url('app_league_join', {code: league.inviteCode}) }}">Rejoindre la ligue</a></p>
+
+<p>Ou saisissez ce code d'invitation une fois connecté(e) : <code>{{ league.inviteCode }}</code></p>

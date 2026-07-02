@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · {{ league.name }}{% endblock %}
+
+{% block body %}
+    <a href="{{ path('app_league_index') }}" class="btn btn-sm btn-link px-0 mb-2">← Mes ligues</a>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="h4 mb-1">{{ league.name }}</h1>
+                    <div class="text-secondary small">
+                        {{ league.isPrivate ? 'Ligue privée' : 'Ligue publique' }} ·
+                        Propriétaire : {{ league.owner.username }}
+                    </div>
+                </div>
+                {% if is_granted('LEAGUE_MANAGE', league) %}
+                    <div class="text-end">
+                        <div class="text-secondary small">Code d'invitation</div>
+                        <code>{{ league.inviteCode }}</code>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if is_granted('LEAGUE_MANAGE', league) %}
+                <hr>
+                <h2 class="h6">Inviter par e-mail</h2>
+                {{ form_start(inviteForm, {action: path('app_league_invite', {id: league.id})}) }}
+                    <div class="d-flex gap-2 align-items-start">
+                        {{ form_widget(inviteForm.email, {attr: {class: 'form-control'}}) }}
+                        <button class="btn btn-primary btn-sm text-nowrap">Envoyer</button>
+                    </div>
+                    {{ form_errors(inviteForm.email) }}
+                {{ form_end(inviteForm) }}
+            {% endif %}
+        </div>
+    </div>
+
+    <h2 class="h5 mb-3">Classement</h2>
+    {% if leaderboard is empty %}
+        <p class="text-secondary">Aucun membre pour l'instant.</p>
+    {% else %}
+        <table class="table table-hover align-middle bg-body shadow-sm rounded">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Membre</th>
+                    <th>Rôle</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membership in leaderboard %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ membership.user.username }}</td>
+                        <td>{{ membership.role.label }}</td>
+                        <td>{{ membership.points }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

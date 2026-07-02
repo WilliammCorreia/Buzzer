@@ -1,0 +1,10 @@
+{% if app.user %}
+    {{ form_start(form, {action: path('app_comment_new', {id: game.id}), attr: {class: 'mb-4'}}) }}
+        {{ form_row(form.content) }}
+        <button class="btn btn-primary btn-sm">Publier</button>
+    {{ form_end(form) }}
+{% else %}
+    <p class="text-secondary mb-4">
+        <a href="{{ path('app_login') }}">Connectez-vous</a> pour commenter.
+    </p>
+{% endif %}

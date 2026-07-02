@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · Rejoindre une ligue{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4">Rejoindre une ligue</h1>
+
+                    {{ form_start(form) }}
+                        {{ form_row(form.inviteCode) }}
+                        <button class="btn btn-primary" type="submit">Rejoindre</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

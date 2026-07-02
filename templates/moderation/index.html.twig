@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · Modération{% endblock %}
+
+{% block body %}
+    <h1 class="h4 mb-3">Modération des commentaires</h1>
+
+    {% if comments is empty %}
+        <p class="text-secondary">Aucun commentaire pour l'instant.</p>
+    {% else %}
+        <table class="table table-hover align-middle bg-body shadow-sm rounded">
+            <thead>
+                <tr>
+                    <th>Auteur</th>
+                    <th>Match</th>
+                    <th>Contenu</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comment in comments %}
+                    <tr>
+                        <td>{{ comment.author.username }}</td>
+                        <td>{{ comment.game.awayTeam.name }} @ {{ comment.game.homeTeam.name }}</td>
+                        <td>{{ comment.content|length > 120 ? comment.content|slice(0, 120) ~ '…' : comment.content }}</td>
+                        <td class="text-secondary small">{{ comment.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            {% if comment.hidden %}
+                                <span class="badge text-bg-secondary">Masqué</span>
+                            {% else %}
+                                <span class="badge text-bg-success">Visible</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="{{ path('app_moderation_comment_toggle', {id: comment.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('moderate_comment_' ~ comment.id) }}">
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    {{ comment.hidden ? 'Réafficher' : 'Masquer' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

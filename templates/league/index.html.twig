@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buzzer · Mes ligues{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">Mes ligues</h1>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_league_join') }}">Rejoindre une ligue</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('app_league_new') }}">Créer une ligue</a>
+        </div>
+    </div>
+
+    {% if memberships is empty %}
+        <p class="text-secondary">Vous ne faites partie d'aucune ligue pour l'instant.</p>
+    {% else %}
+        <table class="table table-hover align-middle bg-body shadow-sm rounded">
+            <thead>
+                <tr>
+                    <th>Ligue</th>
+                    <th>Rôle</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membership in memberships %}
+                    <tr>
+                        <td><a href="{{ path('app_league_show', {id: membership.league.id}) }}">{{ membership.league.name }}</a></td>
+                        <td>{{ membership.role.label }}</td>
+                        <td>{{ membership.points }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
