@@ -2,6 +2,10 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
 
+        # The Messenger Doctrine transport auto-creates this table; keep it out
+        # of schema diff/validate so it isn't reported as an untracked table.
+        schema_filter: '~^(?!messenger_messages)~'
+
         # IMPORTANT: You MUST configure your server version,
         # either here or in the DATABASE_URL env var (see .env file)
         #server_version: '16'
