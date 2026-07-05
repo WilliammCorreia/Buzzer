@@ -77,4 +77,29 @@ class PredictionRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * Best predictors of the platform (admin stats).
+     *
+     * @return list<array{username: string, points: int}>
+     */
+    public function topScorers(int $limit = 5): array
+    {
+        /** @var list<array{username: string, points: int|string}> $rows */
+        $rows = $this->createQueryBuilder('p')
+            ->select('u.username AS username', 'SUM(p.pointsAwarded) AS points')
+            ->innerJoin('p.user', 'u')
+            ->groupBy('u.id')
+            ->addGroupBy('u.username')
+            ->having('SUM(p.pointsAwarded) > 0')
+            ->orderBy('points', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return array_map(
+            static fn (array $row): array => ['username' => (string) $row['username'], 'points' => (int) $row['points']],
+            $rows,
+        );
+    }
 }

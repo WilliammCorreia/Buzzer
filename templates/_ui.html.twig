@@ -1,0 +1,39 @@
+{# Composants Twig réutilisables (logos d'équipes, etc.) #}
+
+{% macro teamLogo(team, size = 'h-8 w-8') %}
+    {%- if team.logoUrl -%}
+        <img src="{{ team.logoUrl }}" alt="" loading="lazy"
+             class="{{ size }} shrink-0 object-contain"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <span class="{{ size }} hidden shrink-0 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-500">{{ team.code }}</span>
+    {%- else -%}
+        <span class="{{ size }} flex shrink-0 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-500">{{ team.code }}</span>
+    {%- endif -%}
+{% endmacro %}
+
+{# Barres de répartition (stats admin). items = [{label, count, class}] #}
+{% macro bars(items, total) %}
+    <div class="space-y-3">
+        {% for item in items %}
+            {% set pct = total > 0 ? (item.count / total * 100)|round : 0 %}
+            <div>
+                <div class="mb-1 flex items-center justify-between text-sm">
+                    <span class="font-medium text-slate-600">{{ item.label }}</span>
+                    <span class="font-semibold tabular-nums text-slate-900">{{ item.count }} <span class="text-xs font-normal text-slate-400">({{ pct }}%)</span></span>
+                </div>
+                <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div class="{{ item.class }} h-full rounded-full" style="width: {{ pct }}%"></div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{# Une équipe = logo + nom, alignés (align 'start' | 'end') #}
+{% macro team(team, align = 'start') %}
+    {% import _self as ui %}
+    <span class="flex min-w-0 items-center gap-2 {{ align == 'end' ? 'flex-row-reverse text-right' }}">
+        {{ ui.teamLogo(team) }}
+        <span class="truncate text-sm font-semibold text-slate-900">{{ team.name }}</span>
+    </span>
+{% endmacro %}

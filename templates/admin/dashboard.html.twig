@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+{% import '_ui.html.twig' as ui %}
+
+{% block title %}Buzzer · Administration{% endblock %}
+
+{% block body %}
+    {{ include('admin/_header.html.twig', {tab: 'dashboard'}) }}
+
+    {# --- Chiffres clés ---------------------------------------------------- #}
+    {% set tiles = [
+        {label: 'Utilisateurs', value: stats.users, icon: '👤'},
+        {label: 'Équipes', value: stats.teams, icon: '🏀'},
+        {label: 'Joueurs', value: stats.players, icon: '⛹️'},
+        {label: 'Matchs', value: stats.games, icon: '📅'},
+        {label: 'Pronostics', value: stats.predictions, icon: '🎯'},
+        {label: 'Ligues', value: stats.leagues, icon: '🏆'},
+        {label: 'Commentaires', value: stats.comments, icon: '💬'},
+        {label: 'Badges attribués', value: stats.badgesAwarded, icon: '🏅'},
+    ] %}
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {% for tile in tiles %}
+            <div class="card !p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-2xl" aria-hidden="true">{{ tile.icon }}</span>
+                    <span class="text-3xl font-extrabold tabular-nums text-slate-900">{{ tile.value }}</span>
+                </div>
+                <div class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ tile.label }}</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# --- Répartitions + top --------------------------------------------- #}
+    <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div class="card">
+            <h2 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">Matchs par statut</h2>
+            {{ ui.bars(gamesByStatus, stats.games) }}
+        </div>
+        <div class="card">
+            <h2 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">Pronostics par statut</h2>
+            {{ ui.bars(predictionsByStatus, totalPredictions) }}
+        </div>
+        <div class="card">
+            <h2 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">Pronostics par type</h2>
+            {{ ui.bars(predictionsByType, totalPredictions) }}
+        </div>
+    </div>
+
+    {# --- Meilleurs pronostiqueurs --------------------------------------- #}
+    <div class="mt-6 card">
+        <h2 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">Meilleurs pronostiqueurs</h2>
+        {% if topScorers is empty %}
+            <p class="text-sm text-slate-500">Aucun point distribué pour l'instant.</p>
+        {% else %}
+            <ol class="divide-y divide-slate-100">
+                {% for scorer in topScorers %}
+                    <li class="flex items-center gap-4 py-3 {{ loop.first ? 'rounded-lg bg-orange-50/60 px-3' }}">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold
+                                     {{ loop.first ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-500' }}">{{ loop.index }}</span>
+                        <span class="grow truncate text-sm font-semibold text-slate-900">{{ scorer.username }}</span>
+                        <span class="shrink-0 text-lg font-extrabold tabular-nums text-slate-900">{{ scorer.points }}<span class="ml-1 text-[11px] font-semibold uppercase text-slate-400">pts</span></span>
+                    </li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+    </div>
+{% endblock %}
