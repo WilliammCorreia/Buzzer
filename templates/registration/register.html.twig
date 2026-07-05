@@ -3,23 +3,20 @@
 {% block title %}Buzzer · Inscription{% endblock %}
 
 {% block body %}
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h1 class="h4 mb-4 text-center">Créer un compte</h1>
+    <div class="mx-auto max-w-md">
+        <div class="card">
+            <h1 class="mb-6 text-center text-xl font-bold text-slate-900">Créer un compte</h1>
 
-                    {{ form_start(form) }}
-                        {{ form_row(form.email) }}
-                        {{ form_row(form.username) }}
-                        {{ form_row(form.plainPassword) }}
-                        <button class="btn btn-primary w-100" type="submit">S'inscrire</button>
-                    {{ form_end(form) }}
-                </div>
-            </div>
-            <p class="text-center text-secondary small mt-3">
-                Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a>.
-            </p>
+            {{ form_start(form) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.username) }}
+                {{ form_row(form.plainPassword) }}
+                <button class="btn-primary w-full" type="submit">S'inscrire</button>
+            {{ form_end(form) }}
         </div>
+        <p class="mt-4 text-center text-sm text-slate-500">
+            Déjà inscrit ?
+            <a class="font-semibold text-orange-600 hover:text-orange-500" href="{{ path('app_login') }}">Se connecter</a>
+        </p>
     </div>
 {% endblock %}

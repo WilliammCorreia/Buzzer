@@ -3,96 +3,84 @@
 {% block title %}Buzzer · Mon historique{% endblock %}
 
 {% block body %}
-    <h1 class="h3 mb-4">Mon historique</h1>
+    <h1 class="mb-6 text-xl font-bold text-slate-900">Mon historique</h1>
 
-    {# --- Statistiques --------------------------------------------------- #}
-    <div class="row row-cols-2 row-cols-md-5 g-3 mb-4">
+    {# --- Statistiques ------------------------------------------------------ #}
+    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {% set cards = [
-            {label: 'Pronostics', value: stats.total, cls: 'secondary'},
-            {label: 'En attente', value: stats.pending, cls: 'warning'},
-            {label: 'Gagnés', value: stats.won, cls: 'success'},
-            {label: 'Perdus', value: stats.lost, cls: 'danger'},
-            {label: 'Points', value: stats.points, cls: 'primary'},
+            {label: 'Pronostics', value: stats.total, cls: 'text-slate-900'},
+            {label: 'En attente', value: stats.pending, cls: 'text-amber-600'},
+            {label: 'Gagnés', value: stats.won, cls: 'text-emerald-600'},
+            {label: 'Perdus', value: stats.lost, cls: 'text-red-600'},
+            {label: 'Points', value: stats.points, cls: 'text-orange-600'},
         ] %}
         {% for card in cards %}
-            <div class="col">
-                <div class="card text-center shadow-sm h-100">
-                    <div class="card-body py-3">
-                        <div class="display-6 fw-bold text-{{ card.cls }}">{{ card.value }}</div>
-                        <div class="text-secondary small text-uppercase">{{ card.label }}</div>
-                    </div>
-                </div>
+            <div class="card !p-4 text-center">
+                <div class="text-2xl font-extrabold tabular-nums {{ card.cls }}">{{ card.value }}</div>
+                <div class="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ card.label }}</div>
             </div>
         {% endfor %}
     </div>
 
-    <p class="mb-4">
+    <p class="mb-6 text-sm text-slate-600">
         Taux de réussite :
         {% if stats.successRate is not null %}
-            <span class="badge text-bg-{{ stats.successRate >= 50 ? 'success' : 'danger' }} fs-6">{{ stats.successRate }}&nbsp;%</span>
-            <span class="text-secondary small">(sur {{ stats.won + stats.lost }} pronostic(s) réglé(s))</span>
+            <span class="badge {{ stats.successRate >= 50 ? 'bg-emerald-100 text-emerald-800 ring-emerald-200' : 'bg-red-100 text-red-700 ring-red-200' }} !text-sm">{{ stats.successRate }}&nbsp;%</span>
+            <span class="text-xs text-slate-400">(sur {{ stats.won + stats.lost }} pronostic(s) réglé(s))</span>
         {% else %}
-            <span class="text-secondary">aucun pronostic encore réglé</span>
+            <span class="text-slate-400">aucun pronostic encore réglé</span>
         {% endif %}
     </p>
 
-    {# --- Badges --------------------------------------------------------- #}
+    {# --- Badges ------------------------------------------------------------ #}
     {% if app.user.userBadges is not empty %}
-        <h2 class="h5 mb-2">Mes badges</h2>
-        <div class="mb-4">
+        <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Mes badges</h2>
+        <div class="mb-6 flex flex-wrap gap-2">
             {% for userBadge in app.user.userBadges %}
-                <span class="badge text-bg-warning me-1 mb-1 p-2" title="{{ userBadge.badge.description }}">
+                <span class="badge bg-amber-100 text-amber-800 ring-amber-200 !py-1.5 !px-3" title="{{ userBadge.badge.description }}">
                     🏅 {{ userBadge.badge.name }}
                 </span>
             {% endfor %}
         </div>
     {% endif %}
 
-    {# --- Liste des pronostics ------------------------------------------- #}
+    {# --- Liste des pronostics ---------------------------------------------- #}
     {% if history is empty %}
-        <div class="alert alert-info">
-            Vous n'avez pas encore de pronostic. <a href="{{ path('app_game_index') }}">Voir le calendrier</a>.
+        <div class="card text-sm text-slate-500">
+            Vous n'avez pas encore de pronostic.
+            <a class="font-semibold text-orange-600 hover:text-orange-500" href="{{ path('app_game_index') }}">Voir le calendrier</a>.
         </div>
     {% else %}
-        <div class="table-responsive">
-            <table class="table table-hover align-middle bg-body shadow-sm rounded">
-                <thead>
-                    <tr>
-                        <th>Match</th>
-                        <th>Mon pronostic</th>
-                        <th class="text-center">Statut</th>
-                        <th class="text-end">Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prediction in history %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('app_game_show', {id: prediction.game.id}) }}" class="text-decoration-none">
-                                    {{ prediction.game.awayTeam.name }} @ {{ prediction.game.homeTeam.name }}
-                                </a>
-                                <div class="text-secondary small">{{ prediction.game.startsAt|date('d/m/Y') }}</div>
-                            </td>
-                            <td>
+        <ul class="space-y-3">
+            {% for prediction in history %}
+                <li class="card !p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="min-w-0">
+                            <a href="{{ path('app_game_show', {id: prediction.game.id}) }}"
+                               class="text-sm font-semibold text-slate-900 hover:text-orange-600">
+                                {{ prediction.game.awayTeam.name }} @ {{ prediction.game.homeTeam.name }}
+                            </a>
+                            <div class="mt-1 text-xs text-slate-400">{{ prediction.game.startsAt|date('d/m/Y') }}</div>
+                            <div class="mt-2 text-sm text-slate-700">
                                 {% if prediction.type == 'match_winner' %}
-                                    Vainqueur : <strong>{{ prediction.predictedWinner.name }}</strong>
+                                    Vainqueur : <span class="font-semibold">{{ prediction.predictedWinner.name }}</span>
                                 {% elseif prediction.type == 'score' %}
-                                    Score : <strong>{{ prediction.predictedAwayScore }} – {{ prediction.predictedHomeScore }}</strong>
+                                    Score : <span class="font-semibold">{{ prediction.predictedAwayScore }} – {{ prediction.predictedHomeScore }}</span>
                                 {% elseif prediction.type == 'player_prop' %}
-                                    <strong>{{ prediction.player.fullName }}</strong>
+                                    <span class="font-semibold">{{ prediction.player.fullName }}</span>
                                     · {{ prediction.statType.label }} {{ prediction.comparison.label|lower }} {{ prediction.predictedValue }}
                                 {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <span class="badge text-bg-{{ prediction.status|status_class }}">{{ prediction.status.label }}</span>
-                            </td>
-                            <td class="text-end fw-semibold">
+                            </div>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+                            <span class="badge {{ prediction.status|status_class }}">{{ prediction.status.label }}</span>
+                            <span class="text-sm font-bold tabular-nums {{ prediction.pointsAwarded > 0 ? 'text-emerald-600' : 'text-slate-300' }}">
                                 {{ prediction.pointsAwarded > 0 ? '+' ~ prediction.pointsAwarded : '—' }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                            </span>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
     {% endif %}
 {% endblock %}

@@ -3,20 +3,18 @@
 {% block title %}Buzzer · Modifier mon profil{% endblock %}
 
 {% block body %}
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h1 class="h4 mb-4">Modifier mon profil</h1>
+    <div class="mx-auto max-w-xl">
+        <div class="card">
+            <h1 class="mb-6 text-xl font-bold text-slate-900">Modifier mon profil</h1>
 
-                    {{ form_start(form) }}
-                        {{ form_row(form.username) }}
-                        {{ form_row(form.favoriteTeams) }}
-                        <button class="btn btn-primary" type="submit">Enregistrer</button>
-                        <a class="btn btn-link" href="{{ path('app_profile_show') }}">Annuler</a>
-                    {{ form_end(form) }}
+            {{ form_start(form) }}
+                {{ form_row(form.username) }}
+                {{ form_row(form.favoriteTeams) }}
+                <div class="mt-2 flex flex-col gap-3 sm:flex-row">
+                    <button class="btn-primary" type="submit">Enregistrer</button>
+                    <a class="btn-secondary" href="{{ path('app_profile_show') }}">Annuler</a>
                 </div>
-            </div>
+            {{ form_end(form) }}
         </div>
     </div>
 {% endblock %}

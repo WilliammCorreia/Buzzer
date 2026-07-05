@@ -3,63 +3,63 @@
 {% block title %}Buzzer · {{ league.name }}{% endblock %}
 
 {% block body %}
-    <a href="{{ path('app_league_index') }}" class="btn btn-sm btn-link px-0 mb-2">← Mes ligues</a>
+    <a href="{{ path('app_league_index') }}" class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-500">
+        ← Mes ligues
+    </a>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h1 class="h4 mb-1">{{ league.name }}</h1>
-                    <div class="text-secondary small">
-                        {{ league.isPrivate ? 'Ligue privée' : 'Ligue publique' }} ·
-                        Propriétaire : {{ league.owner.username }}
-                    </div>
-                </div>
-                {% if is_granted('LEAGUE_MANAGE', league) %}
-                    <div class="text-end">
-                        <div class="text-secondary small">Code d'invitation</div>
-                        <code>{{ league.inviteCode }}</code>
-                    </div>
-                {% endif %}
+    <div class="card mb-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">{{ league.name }}</h1>
+                <p class="mt-1 text-sm text-slate-500">
+                    {{ league.isPrivate ? 'Ligue privée' : 'Ligue publique' }} ·
+                    Propriétaire : <span class="font-semibold text-slate-700">{{ league.owner.username }}</span>
+                </p>
             </div>
-
             {% if is_granted('LEAGUE_MANAGE', league) %}
-                <hr>
-                <h2 class="h6">Inviter par e-mail</h2>
-                {{ form_start(inviteForm, {action: path('app_league_invite', {id: league.id})}) }}
-                    <div class="d-flex gap-2 align-items-start">
-                        {{ form_widget(inviteForm.email, {attr: {class: 'form-control'}}) }}
-                        <button class="btn btn-primary btn-sm text-nowrap">Envoyer</button>
-                    </div>
-                    {{ form_errors(inviteForm.email) }}
-                {{ form_end(inviteForm) }}
+                <div class="rounded-xl bg-slate-50 px-4 py-3 text-left ring-1 ring-slate-200 sm:text-right">
+                    <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Code d'invitation</div>
+                    <code class="text-base font-bold tracking-widest text-orange-600">{{ league.inviteCode }}</code>
+                </div>
             {% endif %}
         </div>
+
+        {% if is_granted('LEAGUE_MANAGE', league) %}
+            <hr class="my-5 border-slate-200">
+            <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Inviter par e-mail</h2>
+            {{ form_start(inviteForm, {action: path('app_league_invite', {id: league.id})}) }}
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+                    <div class="grow">
+                        {{ form_widget(inviteForm.email) }}
+                        {{ form_errors(inviteForm.email) }}
+                    </div>
+                    <button class="btn-primary shrink-0">Envoyer</button>
+                </div>
+            {{ form_end(inviteForm) }}
+        {% endif %}
     </div>
 
-    <h2 class="h5 mb-3">Classement</h2>
+    <h2 class="mb-4 text-lg font-bold text-slate-900">Classement</h2>
     {% if leaderboard is empty %}
-        <p class="text-secondary">Aucun membre pour l'instant.</p>
+        <p class="text-sm text-slate-500">Aucun membre pour l'instant.</p>
     {% else %}
-        <table class="table table-hover align-middle bg-body shadow-sm rounded">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Membre</th>
-                    <th>Rôle</th>
-                    <th>Points</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for membership in leaderboard %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ membership.user.username }}</td>
-                        <td>{{ membership.role.label }}</td>
-                        <td>{{ membership.points }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <ol id="leaderboard" class="card !p-0 divide-y divide-slate-100 overflow-hidden">
+            {% for membership in leaderboard %}
+                <li class="flex items-center gap-4 px-5 py-3.5 {{ loop.index == 1 ? 'bg-orange-50/60' }}">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold
+                                 {{ loop.index == 1 ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-500' }}">
+                        {{ loop.index }}
+                    </span>
+                    <div class="min-w-0 grow">
+                        <div class="truncate text-sm font-semibold text-slate-900">{{ membership.user.username }}</div>
+                        <div class="text-xs text-slate-400">{{ membership.role.label }}</div>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <span class="text-lg font-extrabold tabular-nums text-slate-900">{{ membership.points }}</span>
+                        <span class="ml-1 text-[11px] font-semibold uppercase text-slate-400">pts</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
     {% endif %}
 {% endblock %}

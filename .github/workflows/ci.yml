@@ -60,6 +60,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      - name: Build Tailwind CSS
+        run: php bin/console tailwind:build --minify
+
       # --- Lint --------------------------------------------------------------
       - name: Lint YAML configuration
         run: php bin/console lint:yaml config --parse-tags

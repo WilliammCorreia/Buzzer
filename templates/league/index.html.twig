@@ -3,34 +3,35 @@
 {% block title %}Buzzer · Mes ligues{% endblock %}
 
 {% block body %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0">Mes ligues</h1>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_league_join') }}">Rejoindre une ligue</a>
-            <a class="btn btn-primary btn-sm" href="{{ path('app_league_new') }}">Créer une ligue</a>
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 class="text-xl font-bold text-slate-900">Mes ligues</h1>
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <a class="btn-secondary" href="{{ path('app_league_join') }}">Rejoindre une ligue</a>
+            <a class="btn-primary" href="{{ path('app_league_new') }}">Créer une ligue</a>
         </div>
     </div>
 
     {% if memberships is empty %}
-        <p class="text-secondary">Vous ne faites partie d'aucune ligue pour l'instant.</p>
+        <div class="card text-sm text-slate-500">
+            Vous ne faites partie d'aucune ligue pour l'instant.
+        </div>
     {% else %}
-        <table class="table table-hover align-middle bg-body shadow-sm rounded">
-            <thead>
-                <tr>
-                    <th>Ligue</th>
-                    <th>Rôle</th>
-                    <th>Points</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for membership in memberships %}
-                    <tr>
-                        <td><a href="{{ path('app_league_show', {id: membership.league.id}) }}">{{ membership.league.name }}</a></td>
-                        <td>{{ membership.role.label }}</td>
-                        <td>{{ membership.points }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {% for membership in memberships %}
+                <a href="{{ path('app_league_show', {id: membership.league.id}) }}"
+                   class="card group transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <h2 class="truncate text-base font-bold text-slate-900 group-hover:text-orange-600">{{ membership.league.name }}</h2>
+                            <div class="mt-1 text-xs text-slate-500">{{ membership.role.label }}</div>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <div class="text-2xl font-extrabold tabular-nums text-orange-600">{{ membership.points }}</div>
+                            <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">points</div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
     {% endif %}
 {% endblock %}

@@ -3,37 +3,44 @@
 {% block title %}Buzzer · Mon profil{% endblock %}
 
 {% block body %}
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h1 class="h4 mb-1">{{ user.username }}</h1>
-                    <div class="text-secondary">{{ user.email }}</div>
+    <div class="mx-auto max-w-2xl">
+        <div class="card">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="flex h-14 w-14 items-center justify-center rounded-full bg-orange-600 text-xl font-bold uppercase text-white">
+                        {{ user.username|first }}
+                    </span>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">{{ user.username }}</h1>
+                        <div class="text-sm text-slate-500">{{ user.email }}</div>
+                    </div>
                 </div>
                 {% if user.verified %}
-                    <span class="badge text-bg-success">E-mail vérifié</span>
+                    <span class="badge bg-emerald-100 text-emerald-800 ring-emerald-200 self-start">E-mail vérifié</span>
                 {% else %}
-                    <span class="badge text-bg-warning">E-mail non vérifié</span>
+                    <span class="badge bg-amber-100 text-amber-800 ring-amber-200 self-start">E-mail non vérifié</span>
                 {% endif %}
             </div>
 
-            <hr>
+            <hr class="my-5 border-slate-200">
 
-            <h2 class="h6">Équipes favorites</h2>
+            <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Équipes favorites</h2>
             {% if user.favoriteTeams is empty %}
-                <p class="text-secondary">Aucune équipe favorite.</p>
+                <p class="text-sm text-slate-500">Aucune équipe favorite.</p>
             {% else %}
-                <div class="d-flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2">
                     {% for team in user.favoriteTeams %}
-                        <span class="badge text-bg-secondary">{{ team.name }}</span>
+                        <span class="badge bg-slate-100 text-slate-700 ring-slate-200 !py-1.5 !px-3">{{ team.name }}</span>
                     {% endfor %}
                 </div>
             {% endif %}
 
-            <hr>
+            <hr class="my-5 border-slate-200">
 
-            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_profile_edit') }}">Modifier</a>
-            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_league_index') }}">Mes ligues →</a>
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <a class="btn-primary" href="{{ path('app_profile_edit') }}">Modifier mon profil</a>
+                <a class="btn-secondary" href="{{ path('app_league_index') }}">Mes ligues →</a>
+            </div>
         </div>
     </div>
 {% endblock %}

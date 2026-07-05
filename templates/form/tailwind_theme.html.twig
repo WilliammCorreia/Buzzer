@@ -1,0 +1,63 @@
+{# Thème de formulaire Tailwind de l'application, basé sur le layout Tailwind
+   fourni par Symfony. Chaque bloc fixe les classes par défaut ; un champ peut
+   toujours les surcharger via row_attr / attr. #}
+{% use 'tailwind_2_layout.html.twig' %}
+
+{%- block form_row -%}
+    {%- set row_class = row_class|default('mb-5') -%}
+    {{- parent() -}}
+{%- endblock form_row -%}
+
+{%- block form_label -%}
+    {%- set label_class = label_class|default('block text-sm font-medium text-slate-700 mb-1.5') -%}
+    {{- parent() -}}
+{%- endblock form_label -%}
+
+{%- block form_help -%}
+    {%- set help_class = help_class|default('mt-1.5 text-xs text-slate-500') -%}
+    {{- parent() -}}
+{%- endblock form_help -%}
+
+{%- block form_errors -%}
+    {%- set error_item_class = error_item_class|default('mt-1.5 text-sm font-medium text-red-600') -%}
+    {{- parent() -}}
+{%- endblock form_errors -%}
+
+{%- block form_widget_simple -%}
+    {%- set widget_class = widget_class|default('block w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-orange-600') -%}
+    {%- set widget_errors_class = widget_errors_class|default('ring-red-400 focus:ring-red-500') -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple -%}
+
+{%- block textarea_widget -%}
+    {%- set widget_class = widget_class|default('block w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-orange-600') -%}
+    {%- set widget_errors_class = widget_errors_class|default('ring-red-400 focus:ring-red-500') -%}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}
+
+{%- block choice_widget_collapsed -%}
+    {%- set widget_class = widget_class|default('block w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-orange-600') -%}
+    {%- set widget_errors_class = widget_errors_class|default('ring-red-400 focus:ring-red-500') -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block choice_widget_expanded -%}
+    <div {{ block('widget_container_attributes') }} class="flex flex-wrap gap-x-6 gap-y-2">
+        {%- for child in form %}
+            <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                {{- form_widget(child) -}}
+                <span>{{ child.vars.label|trans({}, translation_domain) }}</span>
+            </label>
+        {% endfor -%}
+    </div>
+{%- endblock choice_widget_expanded -%}
+
+{%- block checkbox_widget -%}
+    {%- set widget_class = widget_class|default('h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-600') -%}
+    {{- parent() -}}
+{%- endblock checkbox_widget -%}
+
+{%- block radio_widget -%}
+    {%- set widget_class = widget_class|default('h-4 w-4 border-slate-300 text-orange-600 focus:ring-orange-600') -%}
+    {{- parent() -}}
+{%- endblock radio_widget -%}

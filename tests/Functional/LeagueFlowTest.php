@@ -59,6 +59,7 @@ final class LeagueFlowTest extends WebTestCase
         $client->followRedirect();
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('table', $member->getUsername());
+        // Anchor on the leaderboard element (stable id), not the markup tag.
+        self::assertSelectorTextContains('#leaderboard', $member->getUsername());
     }
 }

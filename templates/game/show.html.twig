@@ -3,94 +3,106 @@
 {% block title %}Buzzer · {{ game.awayTeam.name }} @ {{ game.homeTeam.name }}{% endblock %}
 
 {% block body %}
-    <a href="{{ path('app_game_index') }}" class="btn btn-sm btn-link px-0 mb-2">← Calendrier</a>
+    <a href="{{ path('app_game_index') }}" class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-500">
+        ← Calendrier
+    </a>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="badge text-bg-{{ game.status|status_class }} mb-2">{{ game.status.label }}</span>
-                    <h1 class="h4 mb-1">
-                        {{ game.awayTeam.name }} <span class="text-secondary">@</span> {{ game.homeTeam.name }}
-                    </h1>
-                    <div class="text-secondary small">
-                        {{ game.startsAt|date('l d F Y · H:i') }}
-                        {% if game.season %} · {{ game.season.label }}{% endif %}
-                    </div>
-                </div>
-                <div class="text-end">
-                    {% if game.homeScore is not null and game.awayScore is not null %}
-                        <div class="display-6 fw-bold">{{ game.awayScore }} – {{ game.homeScore }}</div>
-                        {% if game.winner %}
-                            <div class="small text-success">Vainqueur : {{ game.winner.name }}</div>
-                        {% endif %}
-                    {% else %}
-                        <div class="display-6 fw-bold text-secondary">— : —</div>
-                    {% endif %}
-                </div>
+    {# --- En-tête du match ------------------------------------------------- #}
+    <div class="card mb-6">
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <span class="badge {{ game.status|status_class }}">{{ game.status.label }}</span>
+                <h1 class="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">
+                    {{ game.awayTeam.name }} <span class="text-slate-400">@</span> {{ game.homeTeam.name }}
+                </h1>
+                <p class="mt-1 text-sm text-slate-500">
+                    {{ game.startsAt|date('d/m/Y · H:i') }}
+                    {% if game.season %} · {{ game.season.label }}{% endif %}
+                </p>
             </div>
-
-            <hr>
-
-            {% if game.isOpenForPredictions %}
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <span class="badge text-bg-success">Pronostics ouverts</span>
-                    {% if app.user %}
-                        <a class="btn btn-primary btn-sm" href="{{ path('app_prediction_new', {id: game.id}) }}">Pronostiquer</a>
-                    {% else %}
-                        <a class="btn btn-primary btn-sm" href="{{ path('app_login') }}">Connectez-vous pour pronostiquer</a>
+            <div class="text-left sm:text-right">
+                {% if game.homeScore is not null and game.awayScore is not null %}
+                    <div class="text-4xl font-extrabold tabular-nums tracking-tight text-slate-900">{{ game.awayScore }} – {{ game.homeScore }}</div>
+                    {% if game.winner %}
+                        <div class="mt-1 text-sm font-semibold text-emerald-600">Vainqueur : {{ game.winner.name }}</div>
                     {% endif %}
-                </div>
-            {% else %}
-                <span class="badge text-bg-secondary">Pronostics clôturés</span>
-            {% endif %}
-
-            {% if userPredictions is not empty %}
-                <hr>
-                <h2 class="h6">Vos pronostics</h2>
-                <ul class="list-group">
-                    {% for prediction in userPredictions %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                {% if prediction.type == 'match_winner' %}
-                                    <strong>Vainqueur&nbsp;:</strong> {{ prediction.predictedWinner.name }}
-                                {% elseif prediction.type == 'score' %}
-                                    <strong>Score&nbsp;:</strong> {{ prediction.predictedAwayScore }} – {{ prediction.predictedHomeScore }}
-                                {% elseif prediction.type == 'player_prop' %}
-                                    <strong>{{ prediction.player.fullName }}</strong>
-                                    · {{ prediction.statType.label }} {{ prediction.comparison.label|lower }} {{ prediction.predictedValue }}
-                                {% endif %}
-                                <span class="badge text-bg-{{ prediction.status|status_class }} ms-2">{{ prediction.status.label }}</span>
-                            </div>
-                            {% if is_granted('PREDICTION_DELETE', prediction) %}
-                                <form method="post" action="{{ path('app_prediction_delete', {id: prediction.id}) }}"
-                                      onsubmit="return confirm('Supprimer ce pronostic ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_prediction_' ~ prediction.id) }}">
-                                    <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                                </form>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+                {% else %}
+                    <div class="text-4xl font-extrabold text-slate-300">— : —</div>
+                {% endif %}
+            </div>
         </div>
+
+        <hr class="my-5 border-slate-200">
+
+        {% if game.isOpenForPredictions %}
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="badge bg-emerald-100 text-emerald-800 ring-emerald-200">Pronostics ouverts</span>
+                {% if app.user %}
+                    <a class="btn-primary" href="{{ path('app_prediction_new', {id: game.id}) }}">Pronostiquer</a>
+                {% else %}
+                    <a class="btn-primary" href="{{ path('app_login') }}">Connectez-vous pour pronostiquer</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <span class="badge bg-slate-100 text-slate-700 ring-slate-200">Pronostics clôturés</span>
+        {% endif %}
+
+        {# --- Mes pronostics ------------------------------------------------ #}
+        {% if userPredictions is not empty %}
+            <hr class="my-5 border-slate-200">
+            <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Vos pronostics</h2>
+            <ul class="divide-y divide-slate-100">
+                {% for prediction in userPredictions %}
+                    <li class="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="text-sm text-slate-700">
+                            {% if prediction.type == 'match_winner' %}
+                                <span class="font-semibold">Vainqueur :</span> {{ prediction.predictedWinner.name }}
+                            {% elseif prediction.type == 'score' %}
+                                <span class="font-semibold">Score :</span> {{ prediction.predictedAwayScore }} – {{ prediction.predictedHomeScore }}
+                            {% elseif prediction.type == 'player_prop' %}
+                                <span class="font-semibold">{{ prediction.player.fullName }}</span>
+                                · {{ prediction.statType.label }} {{ prediction.comparison.label|lower }} {{ prediction.predictedValue }}
+                            {% endif %}
+                            <span class="badge {{ prediction.status|status_class }} ml-2">{{ prediction.status.label }}</span>
+                        </div>
+                        {% if is_granted('PREDICTION_DELETE', prediction) %}
+                            <form method="post" action="{{ path('app_prediction_delete', {id: prediction.id}) }}"
+                                  onsubmit="return confirm('Supprimer ce pronostic ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_prediction_' ~ prediction.id) }}">
+                                <button class="btn-danger">Supprimer</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </div>
 
-    <h2 class="h5 mb-3">Commentaires <span class="text-secondary">({{ comments|length }})</span></h2>
-    {{ render(controller('App\\Controller\\CommentController::newForm', {'id': game.id})) }}
-    {% if comments is empty %}
-        <p class="text-secondary">Aucun commentaire pour le moment.</p>
-    {% else %}
-        <ul class="list-group">
-            {% for comment in comments %}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-semibold">{{ comment.author.username }}</span>
-                        <span class="text-secondary small">{{ comment.createdAt|date('d/m/Y H:i') }}</span>
-                    </div>
-                    <div>{{ comment.content }}</div>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    {# --- Commentaires ------------------------------------------------------ #}
+    <section>
+        <h2 class="mb-4 text-lg font-bold text-slate-900">
+            Commentaires <span class="text-sm font-medium text-slate-400">({{ comments|length }})</span>
+        </h2>
+
+        {{ render(controller('App\\Controller\\CommentController::newForm', {'id': game.id})) }}
+
+        {% if comments is empty %}
+            <p class="text-sm text-slate-500">Aucun commentaire pour le moment.</p>
+        {% else %}
+            <ul class="space-y-3">
+                {% for comment in comments %}
+                    <li class="card !p-4">
+                        <div class="mb-1 flex items-center justify-between gap-3">
+                            <span class="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold uppercase text-slate-600">{{ comment.author.username|first }}</span>
+                                {{ comment.author.username }}
+                            </span>
+                            <span class="shrink-0 text-xs text-slate-400">{{ comment.createdAt|date('d/m/Y H:i') }}</span>
+                        </div>
+                        <p class="text-sm leading-relaxed text-slate-700">{{ comment.content }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
 {% endblock %}

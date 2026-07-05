@@ -1,10 +1,10 @@
 {% if app.user %}
-    {{ form_start(form, {action: path('app_comment_new', {id: game.id}), attr: {class: 'mb-4'}}) }}
+    {{ form_start(form, {action: path('app_comment_new', {id: game.id}), attr: {class: 'card !p-4 mb-5'}}) }}
         {{ form_row(form.content) }}
-        <button class="btn btn-primary btn-sm">Publier</button>
+        <button class="btn-primary">Publier</button>
     {{ form_end(form) }}
 {% else %}
-    <p class="text-secondary mb-4">
-        <a href="{{ path('app_login') }}">Connectez-vous</a> pour commenter.
+    <p class="mb-5 text-sm text-slate-500">
+        <a class="font-semibold text-orange-600 hover:text-orange-500" href="{{ path('app_login') }}">Connectez-vous</a> pour commenter.
     </p>
 {% endif %}

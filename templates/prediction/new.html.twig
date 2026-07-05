@@ -3,34 +3,32 @@
 {% block title %}Buzzer · Pronostiquer{% endblock %}
 
 {% block body %}
-    <a href="{{ path('app_game_show', {id: game.id}) }}" class="btn btn-sm btn-link px-0 mb-2">← Retour au match</a>
+    <a href="{{ path('app_game_show', {id: game.id}) }}" class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-500">
+        ← Retour au match
+    </a>
 
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h1 class="h4 mb-1">Pronostiquer</h1>
-                    <p class="text-secondary">
-                        {{ game.awayTeam.name }} <span class="text-secondary">@</span> {{ game.homeTeam.name }}
-                        · {{ game.startsAt|date('d/m/Y H:i') }}
-                    </p>
-
-                    {{ form_start(form) }}
-                        {{ form_row(form.type) }}
-                        <hr>
-                        {# Dynamic fields added by the form events, depending on the chosen type #}
-                        {% for child in form %}
-                            {% if child.vars.name != 'type' %}
-                                {{ form_row(child) }}
-                            {% endif %}
-                        {% endfor %}
-                        <button class="btn btn-primary w-100 mt-2" type="submit">Valider mon pronostic</button>
-                    {{ form_end(form) }}
-                </div>
-            </div>
-            <p class="text-center text-secondary small mt-3">
-                Un seul pronostic par match et par type. Modifiable tant que le match n'a pas commencé.
+    <div class="mx-auto max-w-xl">
+        <div class="card">
+            <h1 class="text-xl font-bold text-slate-900">Pronostiquer</h1>
+            <p class="mb-6 mt-1 text-sm text-slate-500">
+                {{ game.awayTeam.name }} <span class="text-slate-400">@</span> {{ game.homeTeam.name }}
+                · {{ game.startsAt|date('d/m/Y H:i') }}
             </p>
+
+            {{ form_start(form) }}
+                {{ form_row(form.type) }}
+                <hr class="my-5 border-slate-200">
+                {# Champs dynamiques ajoutés par les Form Events selon le type choisi #}
+                {% for child in form %}
+                    {% if child.vars.name != 'type' %}
+                        {{ form_row(child) }}
+                    {% endif %}
+                {% endfor %}
+                <button class="btn-primary mt-2 w-full" type="submit">Valider mon pronostic</button>
+            {{ form_end(form) }}
         </div>
+        <p class="mt-4 text-center text-xs text-slate-500">
+            Un seul pronostic par match et par type. Modifiable tant que le match n'a pas commencé.
+        </p>
     </div>
 {% endblock %}
