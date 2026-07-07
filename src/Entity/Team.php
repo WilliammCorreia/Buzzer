@@ -8,6 +8,7 @@ use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
@@ -16,6 +17,7 @@ class Team
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['team:read'])]
     private ?int $id = null;
 
     /** Identifier of the team in the upstream NBA API (used for idempotent sync). */
@@ -25,14 +27,17 @@ class Team
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Groups(['team:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 10)]
     #[Assert\NotBlank]
+    #[Groups(['team:read'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Groups(['team:read'])]
     private ?string $city = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -42,6 +47,7 @@ class Team
     private ?string $division = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['team:read'])]
     private ?string $logoUrl = null;
 
     /** @var Collection<int, Player> */

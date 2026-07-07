@@ -130,6 +130,27 @@ docker compose exec php php bin/console messenger:consume async -v      # worker
 ```
 ---
 
+## API publique (v1)
+
+Endpoints JSON **en lecture seule**, servis par un contrôleur dédié
+(`src/Controller/Api/GameApiController.php`). La sérialisation s'appuie sur le
+**Serializer Symfony** avec des **groupes de normalisation** (`#[Groups]` sur les
+entités) et un contexte affiné (dates au format ATOM). Les champs internes
+(`apiId`, pronostics, commentaires) ne portent aucun groupe et ne sont donc
+**jamais exposés**.
+
+| Méthode | URI | Groupes | Description |
+|---|---|---|---|
+| GET | `/api/v1/games?page=1` | `game:list`, `team:read` | Calendrier paginé (`meta` + `data`) |
+| GET | `/api/v1/games/{id}` | + `game:detail`, `season:read` | Détail d'un match (saison incluse) |
+
+```bash
+curl http://localhost:8080/api/v1/games | jq
+curl http://localhost:8080/api/v1/games/1 | jq
+```
+
+---
+
 ## Lancer les contrôles qualité (identiques à la CI)
 
 ```bash
@@ -224,7 +245,7 @@ config/            Configuration Symfony (packages, routes, security)
 src/
   Command/         app:nba:sync · app:predictions:settle
   Controller/      Home, Security, Registration, Game, Prediction, League,
-                   Profile, Comment, Moderation
+                   Profile, Comment, Moderation, Admin + Api/ (JSON v1)
   Entity/          Les 15 entités Doctrine
   Enum/            Énumérations métier
   Form/            Formulaires (dont PredictionType dynamique)

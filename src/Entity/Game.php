@@ -9,6 +9,7 @@ use App\Repository\GameRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
@@ -18,6 +19,7 @@ class Game
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['game:list'])]
     private ?int $id = null;
 
     /** Identifier of the game in the upstream NBA API (used for idempotent sync). */
@@ -28,28 +30,35 @@ class Game
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'homeGames')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
+    #[Groups(['game:list'])]
     private ?Team $homeTeam = null;
 
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'awayGames')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
+    #[Groups(['game:list'])]
     private ?Team $awayTeam = null;
 
     #[ORM\ManyToOne(targetEntity: Season::class, inversedBy: 'games')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Groups(['game:detail'])]
     private ?Season $season = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Assert\NotNull]
+    #[Groups(['game:list'])]
     private ?\DateTimeImmutable $startsAt = null;
 
     #[ORM\Column(length: 20, enumType: GameStatus::class)]
+    #[Groups(['game:list'])]
     private GameStatus $status = GameStatus::Scheduled;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['game:list'])]
     private ?int $homeScore = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['game:list'])]
     private ?int $awayScore = null;
 
     /** @var Collection<int, Comment> */
@@ -220,7 +229,10 @@ class Game
     /**
      * RG-01: predictions are accepted only while the game is scheduled and the
      * tip-off has not happened yet.
+     *
+     * Exposed as the virtual `openForPredictions` property in the API.
      */
+    #[Groups(['game:list'])]
     public function isOpenForPredictions(): bool
     {
         return $this->status->isOpenForPredictions()
