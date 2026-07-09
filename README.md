@@ -1,3 +1,7 @@
+### Membre du projet
+- **WilliammCorreia** : William CORREIA 4IW2
+- **kps-243** : Morgan KPASSI 4IW2
+
 # 🏀 Buzzer — Plateforme de pronostics NBA
 
 Application web de pronostics NBA (sans enjeu monétaire) développée avec **Symfony 7.4**.
@@ -189,6 +193,66 @@ le **handler Messenger** et des parcours fonctionnels (pages, formulaire dynamiq
 | Ligues | `League`, `LeagueMembership` |
 | Social | `Comment` (modération : masquage) |
 | Gamification | `Badge`, `UserBadge`, `Notification` |
+
+---
+
+## Validation des données
+
+Chaque entité porte ses **contraintes de validation** (`Symfony\Component\Validator`),
+de sorte qu'une donnée incohérente est rejetée *avant* d'atteindre la base :
+
+- **Cohérence des colonnes** : `NotBlank` / `NotNull` sur toutes les colonnes non nulles,
+  `Length(max: …)` aligné sur la longueur déclarée en base, `Positive` / `PositiveOrZero`
+  sur les identifiants et les scores, `Url` sur les logos et icônes ;
+- **Unicité** : `UniqueEntity` sur `User` (e-mail, pseudo), `League` (code d'invitation),
+  `Badge` (nom), `Team` / `Player` / `Game` (`apiId`), `LeagueMembership` et `UserBadge`
+  (couples), pour obtenir une erreur de formulaire plutôt qu'une exception SQL ;
+- **Règles métier croisées** : une équipe ne peut pas s'affronter elle-même (`Game`),
+  une saison ne peut pas finir avant de commencer (`Season`), un pronostic de score ne peut
+  pas être une égalité (`ScorePrediction`) et l'équipe pronostiquée gagnante doit
+  participer au match (`MatchWinnerPrediction`) ;
+- **Formulaires** : les champs non mappés portent leurs propres contraintes
+  (mot de passe : `Length(min: 8)` + `PasswordStrength`). Le formulaire de pronostic étant
+  non mappé, `PredictionController` **valide explicitement l'entité** avant `persist()`.
+
+Les messages d'erreur sont rédigés en français. Le garde-fou est testé par
+`tests/Integration/EntityValidationTest.php`.
+
+---
+
+## E-mails
+
+Les e-mails transactionnels (confirmation d'inscription, invitation à une ligue) partagent
+un gabarit commun **`templates/email/base_email.html.twig`** (tables + styles inline pour la
+compatibilité des clients mail, en-tête aux couleurs de l'app, bouton d'action, texte
+d'aperçu et lien de repli).
+
+Le transport est piloté par deux variables d'environnement :
+
+| Variable | Rôle |
+|---|---|
+| `MAILER_DSN` | transport utilisé pour l'envoi |
+| `MAILER_FROM` | expéditeur, au format `Nom <adresse>` |
+
+**En développement**, le service `mailpit` de `compose.yaml` capture tous les envois :
+`MAILER_DSN=smtp://mailpit:1025`, boîte de réception sur **<http://localhost:8025>**.
+
+**En production, Mailpit est interdit.** Définissez les variables dans l'environnement du
+serveur (ou dans `.env.prod.local`, non versionné) — le bridge `symfony/resend-mailer` est
+déjà installé :
+
+```dotenv
+MAILER_DSN=resend+api://re_VOTRE_CLE_API@default
+MAILER_FROM="Buzzer <no-reply@votre-domaine.fr>"
+```
+
+L'adresse de `MAILER_FROM` doit appartenir à un **domaine vérifié dans Resend** (enregistrements
+DNS SPF/DKIM), sans quoi l'envoi est refusé. Alternative sans dépendance supplémentaire, via un
+mot de passe d'application Gmail :
+
+```dotenv
+MAILER_DSN=gmail+smtp://ADRESSE@gmail.com:MOT_DE_PASSE_APPLICATION@default
+```
 
 ---
 

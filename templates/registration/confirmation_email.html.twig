@@ -1,7 +1,24 @@
-<p>Bienvenue sur Buzzer !</p>
+{% extends 'email/base_email.html.twig' %}
 
-<p>Merci de confirmer votre adresse e-mail en cliquant sur le lien ci-dessous :</p>
+{% import 'email/_macros.html.twig' as email %}
 
-<p><a href="{{ signedUrl }}">Confirmer mon adresse e-mail</a></p>
+{% block preheader %}Confirmez votre adresse e-mail pour activer votre compte Buzzer.{% endblock %}
 
-<p>Ce lien {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.</p>
+{% block content %}
+    <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;font-weight:700;color:#0f172a;">
+        Bienvenue sur Buzzer{% if user is defined and user.username %}, {{ user.username }}{% endif %} !
+    </h1>
+
+    <p style="margin:0 0 8px;">
+        Merci pour votre inscription. Il ne reste qu'une étape avant de pouvoir pronostiquer :
+        confirmez votre adresse e-mail en cliquant sur le bouton ci-dessous.
+    </p>
+
+    {{ email.button(signedUrl, 'Confirmer mon adresse e-mail') }}
+
+    <p style="margin:0;font-size:13px;color:#64748b;">
+        Ce lien expire dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
+    </p>
+
+    {{ email.fallback_link(signedUrl) }}
+{% endblock %}

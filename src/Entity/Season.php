@@ -20,13 +20,16 @@ class Season
     #[Groups(['season:read'])]
     private ?int $id = null;
 
+    /** The NBA was founded in 1946: no season can predate it. */
     #[ORM\Column]
     #[Assert\NotNull]
+    #[Assert\Range(min: 1946, max: 2100)]
     #[Groups(['season:read'])]
     private ?int $year = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
     #[Groups(['season:read'])]
     private ?string $label = null;
 
@@ -36,6 +39,7 @@ class Season
 
     #[ORM\Column(type: 'date_immutable')]
     #[Assert\NotNull]
+    #[Assert\GreaterThan(propertyPath: 'startDate', message: 'La date de fin doit être postérieure à la date de début.')]
     private ?\DateTimeImmutable $endDate = null;
 
     /** @var Collection<int, Game> */

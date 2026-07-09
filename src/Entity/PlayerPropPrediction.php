@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Enum\Comparison;
 use App\Enum\StatType;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Prediction on a player statistic (points / rebounds / assists) being over or
@@ -18,15 +19,21 @@ class PlayerPropPrediction extends Prediction
     /** STI child columns must be nullable at the database level. */
     #[ORM\ManyToOne(targetEntity: Player::class)]
     #[ORM\JoinColumn(name: 'player_id', nullable: true, onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: 'Veuillez choisir un joueur.')]
     private ?Player $player = null;
 
     #[ORM\Column(length: 20, nullable: true, enumType: StatType::class)]
+    #[Assert\NotNull(message: 'Veuillez choisir une statistique.')]
     private ?StatType $statType = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
+    #[Assert\NotNull(message: 'Veuillez saisir un seuil.')]
+    #[Assert\PositiveOrZero(message: 'Le seuil doit être supérieur ou égal à 0.')]
+    #[Assert\LessThanOrEqual(value: 200, message: 'Le seuil ne peut pas dépasser {{ compared_value }}.')]
     private ?float $predictedValue = null;
 
     #[ORM\Column(length: 10, nullable: true, enumType: Comparison::class)]
+    #[Assert\NotNull(message: 'Veuillez choisir le sens du pronostic (au-dessus ou en dessous).')]
     private ?Comparison $comparison = null;
 
     public function getType(): string

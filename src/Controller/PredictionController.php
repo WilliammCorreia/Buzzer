@@ -20,11 +20,13 @@ use App\Repository\PredictionRepository;
 use App\Security\Voter\PredictionVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PredictionController extends AbstractController
 {
@@ -32,8 +34,13 @@ class PredictionController extends AbstractController
 
     #[Route('/matchs/{id}/pronostiquer', name: 'app_prediction_new', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Game $game, Request $request, EntityManagerInterface $entityManager, PredictionRepository $predictions): Response
-    {
+    public function new(
+        Game $game,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PredictionRepository $predictions,
+        ValidatorInterface $validator,
+    ): Response {
         // RG-01: predictions are only accepted while the game is open.
         if (!$game->isOpenForPredictions()) {
             $this->addFlash('error', 'Les pronostics sont clôturés pour ce match.');
@@ -67,12 +74,22 @@ class PredictionController extends AbstractController
             $prediction = $this->buildPrediction($chosenType, $form);
             $prediction->setUser($user)->setGame($game);
 
-            $entityManager->persist($prediction);
-            $entityManager->flush();
+            // The form is unmapped, so the entity constraints — including the
+            // cross-field rules — only run if we validate the entity explicitly.
+            $violations = $validator->validate($prediction);
 
-            $this->addFlash('success', 'Pronostic enregistré ! Bonne chance.');
+            if (\count($violations) === 0) {
+                $entityManager->persist($prediction);
+                $entityManager->flush();
 
-            return $this->redirectToRoute('app_game_show', ['id' => $game->getId()]);
+                $this->addFlash('success', 'Pronostic enregistré ! Bonne chance.');
+
+                return $this->redirectToRoute('app_game_show', ['id' => $game->getId()]);
+            }
+
+            foreach ($violations as $violation) {
+                $form->addError(new FormError((string) $violation->getMessage()));
+            }
         }
 
         return $this->render('prediction/new.html.twig', [

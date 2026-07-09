@@ -18,15 +18,17 @@ class Comment
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     private ?User $author = null;
 
     #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     private ?Game $game = null;
 
     #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 1, max: 2000)]
+    #[Assert\NotBlank(message: 'Le commentaire ne peut pas être vide.')]
+    #[Assert\Length(max: 2000, maxMessage: 'Le commentaire ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $content = null;
 
     #[ORM\Column(type: 'datetime_immutable')]

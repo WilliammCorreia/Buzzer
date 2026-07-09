@@ -32,9 +32,13 @@ class RegistrationFormType extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank(message: 'Merci de saisir un mot de passe.'),
                     new Assert\Length(
-                        min: 6,
+                        min: 8,
                         max: 4096,
                         minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
+                    ),
+                    new Assert\PasswordStrength(
+                        minScore: Assert\PasswordStrength::STRENGTH_WEAK,
+                        message: 'Ce mot de passe est trop facile à deviner : ajoutez des chiffres, des majuscules ou des caractères spéciaux.',
                     ),
                 ],
             ]);

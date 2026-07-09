@@ -8,10 +8,12 @@ use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
+#[UniqueEntity(fields: ['apiId'])]
 class Team
 {
     #[ORM\Id]
@@ -23,30 +25,38 @@ class Team
     /** Identifier of the team in the upstream NBA API (used for idempotent sync). */
     #[ORM\Column(unique: true)]
     #[Assert\NotNull]
+    #[Assert\Positive]
     private ?int $apiId = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[Groups(['team:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 10)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 10)]
     #[Groups(['team:read'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[Groups(['team:read'])]
     private ?string $city = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
     private ?string $conference = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
     private ?string $division = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url(requireTld: true)]
     #[Groups(['team:read'])]
     private ?string $logoUrl = null;
 

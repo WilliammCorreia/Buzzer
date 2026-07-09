@@ -20,6 +20,7 @@ class Notification
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'notifications')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     private ?User $recipient = null;
 
     #[ORM\Column(length: 30, enumType: NotificationType::class)]

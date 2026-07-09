@@ -21,20 +21,25 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['username'], message: 'Ce pseudo est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    /** Roles that may be persisted on a user (ROLE_USER is always granted implicitly). */
+    public const AVAILABLE_ROLES = ['ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
+    #[Assert\NotBlank(message: 'Merci de saisir une adresse e-mail.')]
+    #[Assert\Email(message: "L'adresse « {{ value }} » n'est pas une adresse e-mail valide.")]
+    #[Assert\Length(max: 180, maxMessage: "L'adresse e-mail ne peut pas dépasser {{ limit }} caractères.")]
     private ?string $email = null;
 
     /**
      * @var list<string>
      */
     #[ORM\Column]
+    #[Assert\All([new Assert\Choice(choices: self::AVAILABLE_ROLES)])]
     private array $roles = [];
 
     /**
@@ -44,8 +49,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 3, max: 50)]
+    #[Assert\NotBlank(message: 'Merci de saisir un pseudo.')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'Le pseudo doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le pseudo ne peut pas dépasser {{ limit }} caractères.',
+    )]
     private ?string $username = null;
 
     #[ORM\Column(type: 'datetime_immutable')]

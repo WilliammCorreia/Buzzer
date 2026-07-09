@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Enum\LeagueRole;
 use App\Repository\LeagueMembershipRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Association entity between {@see User} and {@see League} carrying the per-league
@@ -16,6 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity(repositoryClass: LeagueMembershipRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_membership_user_league', columns: ['user_id', 'league_id'])]
+#[UniqueEntity(fields: ['user', 'league'], message: 'Cet utilisateur est déjà membre de cette ligue.', errorPath: 'league')]
 class LeagueMembership
 {
     #[ORM\Id]
@@ -25,13 +28,16 @@ class LeagueMembership
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'leagueMemberships')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: League::class, inversedBy: 'memberships')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     private ?League $league = null;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero]
     private int $points = 0;
 
     #[ORM\Column(length: 20, enumType: LeagueRole::class)]

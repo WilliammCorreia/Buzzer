@@ -52,6 +52,7 @@ class PredictionType extends AbstractType
             'mapped' => false,
             'choices' => self::TYPES,
             'data' => $predictionType,
+            'constraints' => [new Assert\NotBlank(message: 'Merci de choisir un type de pronostic.')],
             'attr' => [
                 // Switching the type reloads the page with the matching fields.
                 'onchange' => "window.location.href='?type=' + this.value",
@@ -137,7 +138,11 @@ class PredictionType extends AbstractType
                         'label' => 'Seuil',
                         'mapped' => false,
                         'scale' => 1,
-                        'constraints' => [new Assert\NotNull(), new Assert\PositiveOrZero()],
+                        'constraints' => [
+                            new Assert\NotNull(),
+                            new Assert\PositiveOrZero(),
+                            new Assert\LessThanOrEqual(value: 200, message: 'Le seuil ne peut pas dépasser {{ compared_value }}.'),
+                        ],
                     ]);
                 break;
 

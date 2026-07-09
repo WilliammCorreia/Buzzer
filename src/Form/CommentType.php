@@ -9,20 +9,16 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @extends AbstractType<mixed> */
 class CommentType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // "content" is mapped, so the constraints declared on Comment::$content apply.
         $builder->add('content', TextareaType::class, [
             'label' => false,
             'attr' => ['rows' => 3, 'placeholder' => 'Votre commentaire...'],
-            'constraints' => [
-                new Assert\NotBlank(),
-                new Assert\Length(min: 1, max: 2000),
-            ],
         ]);
     }
 

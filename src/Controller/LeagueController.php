@@ -155,7 +155,7 @@ class LeagueController extends AbstractController
                 ->to($email)
                 ->subject(sprintf('Invitation à rejoindre la ligue « %s »', $league->getName()))
                 ->htmlTemplate('league/invite_email.html.twig')
-                ->context(['league' => $league]));
+                ->context(['league' => $league, 'inviter' => $this->getUser()]));
 
             $this->addFlash('success', sprintf('Invitation envoyée à %s.', $email));
         } else {

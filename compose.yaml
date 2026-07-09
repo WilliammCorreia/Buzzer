@@ -32,6 +32,14 @@ services:
     volumes:
       - ./:/app:rw
 
+  # Capture les e-mails en DEV uniquement (UI: http://localhost:8025).
+  # En production, le vrai envoi passe par Resend (voir README, section E-mails).
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: buzzer_mailpit
+    ports:
+      - "${MAILPIT_HTTP_PORT:-8025}:8025"
+
   web:
     image: nginx:1.27-alpine
     container_name: buzzer_web

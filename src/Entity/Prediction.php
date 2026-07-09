@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Enum\PredictionStatus;
 use App\Repository\PredictionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Root of the prediction hierarchy, mapped with Single Table Inheritance.
@@ -38,16 +39,19 @@ abstract class Prediction
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'predictions')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     protected ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'predictions')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
     protected ?Game $game = null;
 
     #[ORM\Column(length: 20, enumType: PredictionStatus::class)]
     protected PredictionStatus $status = PredictionStatus::Pending;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero]
     protected int $pointsAwarded = 0;
 
     #[ORM\Column(type: 'datetime_immutable')]

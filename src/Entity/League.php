@@ -22,17 +22,25 @@ class League
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 3, max: 100)]
+    #[Assert\NotBlank(message: 'Le nom de la ligue est obligatoire.')]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: 'Le nom de la ligue doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le nom de la ligue ne peut pas dépasser {{ limit }} caractères.',
+    )]
     private ?string $name = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'ownedLeagues')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?User $owner = null;
 
     /** RG-06: each league exposes a unique invitation code. */
     #[ORM\Column(length: 16)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 16)]
+    #[Assert\Regex(pattern: '/^[A-Z0-9]+$/')]
     private ?string $inviteCode = null;
 
     #[ORM\Column]

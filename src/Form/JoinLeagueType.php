@@ -19,6 +19,7 @@ class JoinLeagueType extends AbstractType
             'label' => "Code d'invitation",
             'constraints' => [
                 new Assert\NotBlank(message: "Merci de saisir un code d'invitation."),
+                new Assert\Length(max: 16, maxMessage: "Le code d'invitation ne peut pas dépasser {{ limit }} caractères."),
             ],
         ]);
     }

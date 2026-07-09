@@ -47,7 +47,8 @@ class RegistrationController extends AbstractController
                 ->from($mailerFrom)
                 ->to((string) $user->getEmail())
                 ->subject('Confirmez votre adresse e-mail')
-                ->htmlTemplate('registration/confirmation_email.html.twig'));
+                ->htmlTemplate('registration/confirmation_email.html.twig')
+                ->context(['user' => $user]));
 
             $security->login($user, LoginFormAuthenticator::class, 'main');
 

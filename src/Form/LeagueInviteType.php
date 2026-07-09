@@ -19,7 +19,8 @@ class LeagueInviteType extends AbstractType
             'label' => 'Adresse e-mail à inviter',
             'constraints' => [
                 new Assert\NotBlank(message: 'Merci de saisir une adresse e-mail.'),
-                new Assert\Email(),
+                new Assert\Email(message: "L'adresse « {{ value }} » n'est pas une adresse e-mail valide."),
+                new Assert\Length(max: 180, maxMessage: "L'adresse e-mail ne peut pas dépasser {{ limit }} caractères."),
             ],
         ]);
     }

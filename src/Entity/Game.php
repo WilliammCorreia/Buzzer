@@ -9,11 +9,13 @@ use App\Repository\GameRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 #[ORM\Index(name: 'idx_game_starts_at', columns: ['starts_at'])]
+#[UniqueEntity(fields: ['apiId'])]
 class Game
 {
     #[ORM\Id]
@@ -25,6 +27,7 @@ class Game
     /** Identifier of the game in the upstream NBA API (used for idempotent sync). */
     #[ORM\Column(unique: true)]
     #[Assert\NotNull]
+    #[Assert\Positive]
     private ?int $apiId = null;
 
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'homeGames')]
@@ -36,6 +39,7 @@ class Game
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'awayGames')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
+    #[Assert\NotEqualTo(propertyPath: 'homeTeam', message: "L'équipe à l'extérieur doit être différente de l'équipe à domicile.")]
     #[Groups(['game:list'])]
     private ?Team $awayTeam = null;
 
@@ -54,10 +58,12 @@ class Game
     private GameStatus $status = GameStatus::Scheduled;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
     #[Groups(['game:list'])]
     private ?int $homeScore = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
     #[Groups(['game:list'])]
     private ?int $awayScore = null;
 

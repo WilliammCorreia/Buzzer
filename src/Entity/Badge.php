@@ -8,9 +8,11 @@ use App\Repository\BadgeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BadgeRepository::class)]
+#[UniqueEntity(fields: ['name'], message: 'Un badge portant ce nom existe déjà.')]
 class Badge
 {
     #[ORM\Id]
@@ -20,6 +22,7 @@ class Badge
 
     #[ORM\Column(length: 100, unique: true)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $name = null;
 
     #[ORM\Column(type: 'text')]
@@ -27,6 +30,8 @@ class Badge
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url(requireTld: true)]
     private ?string $iconUrl = null;
 
     /** Numeric threshold that, once reached, automatically awards the badge. */

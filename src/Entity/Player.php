@@ -6,9 +6,11 @@ namespace App\Entity;
 
 use App\Repository\PlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
+#[UniqueEntity(fields: ['apiId'])]
 class Player
 {
     #[ORM\Id]
@@ -19,17 +21,21 @@ class Player
     /** Identifier of the player in the upstream NBA API (used for idempotent sync). */
     #[ORM\Column(unique: true)]
     #[Assert\NotNull]
+    #[Assert\Positive]
     private ?int $apiId = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
     private ?string $position = null;
 
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'players')]
