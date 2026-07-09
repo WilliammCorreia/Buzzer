@@ -3,5 +3,21 @@
 /var
 /vendor
 /node_modules
+
+# Never bake secrets into an image.
 /.env.local
 /.env.*.local
+
+# Rebuilt inside the production image.
+/public/assets
+/public/bundles
+
+# Dev-only tooling and documentation.
+/tests
+/.phpunit.cache
+/phpstan.dist.neon
+/phpunit.dist.xml
+/compose.yaml
+/compose.prod.yaml
+/*.md
+/mcd.png

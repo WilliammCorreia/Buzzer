@@ -1,0 +1,93 @@
+# Production stack — deploy with:
+#   cp .env.prod.local.dist .env.prod.local   (then fill in the secrets)
+#   docker compose -f compose.prod.yaml up -d --build
+#
+# No service publishes a port except Caddy: the database and php-fpm are only
+# reachable over the internal Docker network. This matters because published
+# ports bypass ufw/iptables rules.
+name: buzzer-prod
+
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: buzzer_prod_database
+    restart: unless-stopped
+    env_file:
+      - .env.prod.local
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    healthcheck:
+      # $$ escapes compose interpolation: the shell inside the container expands it.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: php
+    image: buzzer/php:prod
+    container_name: buzzer_prod_php
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env.prod.local
+
+  # SettleGameMessage is routed to the "async" transport: without this worker the
+  # predictions of a finished game are never settled.
+  worker:
+    # Same build and same tag as "php": Compose builds the image once and the
+    # worker always runs the exact code that serves the requests.
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: php
+    image: buzzer/php:prod
+    container_name: buzzer_prod_worker
+    restart: unless-stopped
+    depends_on:
+      php:
+        condition: service_started
+      database:
+        condition: service_healthy
+    env_file:
+      - .env.prod.local
+    command:
+      - php
+      - bin/console
+      - messenger:consume
+      - async
+      - --time-limit=3600
+      - --memory-limit=128M
+
+  caddy:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: caddy
+    image: buzzer/caddy:prod
+    container_name: buzzer_prod_caddy
+    restart: unless-stopped
+    depends_on:
+      - php
+    environment:
+      # ":80" disables TLS, for a local check of the production image.
+      SITE_ADDRESS: ${SITE_ADDRESS:-willix.fr}
+      ACME_EMAIL: ${ACME_EMAIL:-contact@willix.fr}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      # Certificates and ACME account keys: losing this volume means
+      # re-requesting a certificate, and Let's Encrypt rate-limits that.
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  database_data:
+  caddy_data:
+  caddy_config:

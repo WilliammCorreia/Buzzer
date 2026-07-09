@@ -1,0 +1,32 @@
+{
+	# Let's Encrypt registration address (certificate expiry notices).
+	email {$ACME_EMAIL}
+
+	# The admin API is unauthenticated; nothing in this stack uses it.
+	admin off
+}
+
+# In production SITE_ADDRESS is the domain, and Caddy obtains and renews the
+# TLS certificate on its own. Set it to ":80" to run without TLS (local check).
+{$SITE_ADDRESS} {
+	root * /app/public
+	encode zstd gzip
+
+	# AssetMapper emits digested, content-addressed filenames.
+	header /assets/* Cache-Control "public, max-age=31536000, immutable"
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	php_fastcgi php:9000
+	file_server
+
+	log {
+		output stdout
+	}
+}

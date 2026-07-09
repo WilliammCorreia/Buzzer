@@ -196,6 +196,48 @@ le **handler Messenger** et des parcours fonctionnels (pages, formulaire dynamiq
 
 ---
 
+## Déploiement en production (VPS)
+
+La stack de production est décrite par **`compose.prod.yaml`**, distinct du `compose.yaml`
+de développement. Elle diffère sur quatre points :
+
+- **Caddy** remplace nginx : il sert `public/`, parle FastCGI à php-fpm et obtient/renouvelle
+  le certificat Let's Encrypt tout seul (`docker/prod/Caddyfile`) ;
+- **seul Caddy publie des ports** (80/443). PostgreSQL et php-fpm ne sont joignables que sur
+  le réseau Docker interne — un port publié contourne les règles `ufw` ;
+- **pas de Mailpit**, et l'image (`docker/prod/Dockerfile`) embarque le code, l'autoloader
+  optimisé et les assets compilés, sans `.git`, sans `tests/` ni dépendances de dev ;
+- un **worker `messenger:consume`** traite `SettleGameMessage`, routé sur le transport `async`.
+
+```bash
+# 1. Renseigner les secrets (fichier non versionné, jamais copié dans l'image)
+cp .env.prod.local.dist .env.prod.local
+$EDITOR .env.prod.local
+
+# 2. Construire et démarrer
+docker compose -f compose.prod.yaml up -d --build
+
+# 3. Appliquer les migrations
+docker compose -f compose.prod.yaml exec php php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+Le DNS de `willix.fr` doit pointer sur le VPS **avant** le premier démarrage : Caddy demande le
+certificat immédiatement, et Let's Encrypt limite les tentatives échouées. Le volume `caddy_data`
+conserve le certificat, ne le supprimez pas à chaque déploiement.
+
+> ⚠️ `SYMFONY_TRUSTED_PROXIES=private_ranges` n'est pas optionnel. Sans lui, Symfony ignore les
+> en-têtes `X-Forwarded-*` de Caddy : les URLs absolues (liens de confirmation d'e-mail) seraient
+> générées en `http://`, le cookie de session perdrait son attribut `secure`, et les journaux
+> enregistreraient l'IP de Caddy à la place de celle du visiteur.
+
+Pour vérifier l'image de production en local, sans TLS ni domaine :
+
+```bash
+SITE_ADDRESS=:80 HTTP_PORT=8081 docker compose -f compose.prod.yaml up -d --build
+```
+
+---
+
 ## Validation des données
 
 Chaque entité porte ses **contraintes de validation** (`Symfony\Component\Validator`),
