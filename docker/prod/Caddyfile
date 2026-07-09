@@ -4,6 +4,17 @@
 
 	# The admin API is unauthenticated; nothing in this stack uses it.
 	admin off
+
+	servers {
+		# Caddy rewrites X-Forwarded-* from the connection it sees, unless the
+		# peer is a trusted proxy — in which case it keeps the incoming ones.
+		# Required when a host reverse proxy terminates TLS in front of Caddy,
+		# otherwise X-Forwarded-Proto would be downgraded to "http" and Symfony
+		# would emit http:// URLs and a session cookie without "secure".
+		# Harmless when Caddy is exposed directly: public clients are never in
+		# a private range, so their forged headers keep being overwritten.
+		trusted_proxies static private_ranges
+	}
 }
 
 # In production SITE_ADDRESS is the domain, and Caddy obtains and renews the

@@ -225,16 +225,45 @@ Le DNS de `willix.fr` doit pointer sur le VPS **avant** le premier démarrage : 
 certificat immédiatement, et Let's Encrypt limite les tentatives échouées. Le volume `caddy_data`
 conserve le certificat, ne le supprimez pas à chaque déploiement.
 
-> ⚠️ `SYMFONY_TRUSTED_PROXIES=private_ranges` n'est pas optionnel. Sans lui, Symfony ignore les
-> en-têtes `X-Forwarded-*` de Caddy : les URLs absolues (liens de confirmation d'e-mail) seraient
-> générées en `http://`, le cookie de session perdrait son attribut `secure`, et les journaux
-> enregistreraient l'IP de Caddy à la place de celle du visiteur.
-
 Pour vérifier l'image de production en local, sans TLS ni domaine :
 
 ```bash
 SITE_ADDRESS=:80 HTTP_PORT=8081 docker compose -f compose.prod.yaml up -d --build
 ```
+
+### Si le VPS a déjà un reverse proxy (nginx + certbot)
+
+Les ports 80 et 443 étant pris, Caddy ne fait plus de TLS et n'écoute que sur la loopback ;
+le proxy de l'hôte lui transmet les requêtes. Ajoutez l'override :
+
+```bash
+docker compose -f compose.prod.yaml -f compose.prod.behind-proxy.yaml up -d --build
+```
+
+Côté hôte, dans le `server` HTTPS déjà géré par certbot :
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Neutralise les en-têtes qu'un client pourrait forger (nginx relaie par
+    # défaut les en-têtes inconnus vers l'amont).
+    proxy_set_header X-Forwarded-Host  "";
+    proxy_set_header X-Forwarded-Port  "";
+}
+client_max_body_size 16m;
+```
+
+> ⚠️ **`SYMFONY_TRUSTED_PROXIES` et `SYMFONY_TRUSTED_HEADERS` ne sont pas optionnels.**
+> Sans eux, Symfony ignore `X-Forwarded-Proto` : les liens de confirmation d'e-mail seraient
+> générés en `http://` et le cookie de session perdrait son attribut `secure`.
+> Inversement, `x-forwarded-host` ne doit **jamais** être ajouté à `SYMFONY_TRUSTED_HEADERS` :
+> derrière un proxy d'hôte, un client peut le forger et détourner les URLs absolues vers son
+> propre domaine. `SYMFONY_TRUSTED_HOSTS` sert de seconde barrière.
 
 ---
 

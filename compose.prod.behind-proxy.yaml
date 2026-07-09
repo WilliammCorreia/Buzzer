@@ -1,0 +1,15 @@
+# Override for a VPS that ALREADY terminates TLS (nginx + certbot, Traefik, …)
+# and therefore already owns ports 80 and 443.
+#
+#   docker compose -f compose.prod.yaml -f compose.prod.behind-proxy.yaml up -d --build
+#
+# Caddy stops doing TLS and only listens on 127.0.0.1:8080, so it is reachable
+# by the host reverse proxy and by nobody else. See the README for the nginx
+# server block to add.
+services:
+  caddy:
+    environment:
+      # ":80" = plain HTTP, no ACME, no certificate.
+      SITE_ADDRESS: ":80"
+    ports: !override
+      - "127.0.0.1:${APP_PORT:-8080}:80"
